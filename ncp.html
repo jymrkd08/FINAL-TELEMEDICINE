@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedFlow AI | Advanced NCP Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .grid-pattern { background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0); background-size: 40px 40px; }
+        .card-glow:hover { box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.5); }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 0; } 100% { transform: scale(0.8); opacity: 0; } }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen selection:bg-blue-500/30 grid-pattern">
+
+    <header class="sticky top-0 z-40 w-full glass border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="group flex items-center gap-2 p-2 rounded-xl hover:bg-white/5 transition-all" title="Back to Index">
+                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                        <svg class="w-5 h-5 text-slate-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </div>
+                    <span class="text-sm font-semibold tracking-widest uppercase text-slate-400 group-hover:text-white transition-colors">Return</span>
+                </a>
+                <div class="h-6 w-px bg-white/10 mx-2"></div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/50 flex items-center justify-center font-bold text-blue-400 text-xs shadow-[0_0_10px_rgba(37,99,235,0.3)]">SPCF</div>
+                    <h1 class="text-sm font-bold tracking-tight text-white uppercase tracking-widest">SPCF <span class="text-blue-500">Medical Center Inc.</span></h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-950 rounded-full border border-white/5">
+                    <div class="relative w-2 h-2">
+                        <div class="absolute inset-0 bg-emerald-500 rounded-full animate-ping"></div>
+                        <div class="absolute inset-0 bg-emerald-500 rounded-full"></div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-emerald-500 uppercase">System Active</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div>
+                <h2 class="text-4xl font-extrabold text-white tracking-tight mb-2">Care Command Center</h2>
+                <p class="text-slate-400">Monitoring 10 active NCP pipelines with real-time diagnostic synchronization.</p>
+            </div>
+            <div class="flex gap-4">
+                <div class="bg-slate-900/50 backdrop-blur border border-white/5 p-5 rounded-3xl w-40">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Active Plans</p>
+                    <p class="text-3xl font-mono text-white">10</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="patient-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Patient cards injected here -->
+        </div>
+    </main>
+
+    <div id="modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+        <div class="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden relative">
+            <div class="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none"></div>
+            <div class="p-8 pb-4 flex justify-between items-start relative">
+                <div>
+                    <h2 id="modal-title" class="text-2xl font-bold text-white mb-1">Patient Details</h2>
+                    <p id="modal-subtitle" class="text-sm text-blue-400 font-mono"></p>
+                </div>
+                <button onclick="closeModal()" class="p-2 hover:bg-white/10 rounded-full transition-colors text-slate-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modal-body" class="p-8 pt-6 relative space-y-6"></div>
+        </div>
+    </div>
+
+    <script>
+        const patients = [
+            { id: 1, name: "Alice Johnson", age: 45, diagnosis: "Hypertension", status: "Stable", drugs: ["Amlodipine 5mg", "Losartan 50mg"], equip: ["Digital BP Monitor"], labs: ["Urinalysis", "Lipid Profile"] },
+            { id: 2, name: "Bob Smith", age: 62, diagnosis: "Type 2 Diabetes", status: "Critical", drugs: ["Metformin 500mg", "Insulin"], equip: ["Glucometer"], labs: ["HbA1c", "Urinalysis"] },
+            { id: 3, name: "Charlie Davis", age: 31, diagnosis: "Acute Gastritis", status: "Stable", drugs: ["Omeprazole 20mg"], equip: ["N/A"], labs: ["Fecalysis", "CBC"] },
+            { id: 4, name: "Diana Prince", age: 28, diagnosis: "Post-Viral Fatigue", status: "Monitoring", drugs: ["Multivitamins"], equip: ["Thermometer"], labs: ["CBC", "Urinalysis"] },
+            { id: 5, name: "Edward Norton", age: 55, diagnosis: "Hyperlipidemia", status: "Stable", drugs: ["Simvastatin 20mg"], equip: ["N/A"], labs: ["Lipid Profile", "Fecalysis"] },
+            { id: 6, name: "Fiona Gallagher", age: 39, diagnosis: "Asthma", status: "Stable", drugs: ["Salbutamol Inhaler"], equip: ["Nebulizer"], labs: ["Spirometry"] },
+            { id: 7, name: "George Miller", age: 70, diagnosis: "Osteoarthritis", status: "Chronic", drugs: ["Ibuprofen", "Calcium"], equip: ["Walker"], labs: ["X-Ray"] },
+            { id: 8, name: "Hannah Abbott", age: 22, diagnosis: "UTI", status: "Stable", drugs: ["Ciprofloxacin 500mg"], equip: ["N/A"], labs: ["Urinalysis", "Fecalysis"] },
+            { id: 9, name: "Ian Wright", age: 48, diagnosis: "Anxiety Disorder", status: "Stable", drugs: ["Sertraline 50mg"], equip: ["N/A"], labs: ["Blood Chemistry"] },
+            { id: 10, name: "Jane Foster", age: 34, diagnosis: "Migraine", status: "Stable", drugs: ["Sumatriptan"], equip: ["Ice pack"], labs: ["Urinalysis"] }
+        ];
+
+        function renderPatients() {
+            const grid = document.getElementById('patient-grid');
+            grid.innerHTML = patients.map(p => `
+                <div class="group bg-slate-900 border border-white/5 p-6 rounded-3xl transition-all duration-500 hover:scale-[1.02] card-glow">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="font-mono text-xs text-blue-500 font-bold bg-blue-500/10 px-2 py-1 rounded">ID: 00${p.id}</div>
+                        <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded-full ${p.status === 'Critical' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}">${p.status}</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-1 group-hover:text-blue-400 transition-colors">${p.name}</h3>
+                    <p class="text-slate-500 text-xs mb-6 font-mono tracking-wider">${p.age} YR | ${p.diagnosis.toUpperCase()}</p>
+                    <button onclick="viewPatient(${p.id})" class="w-full bg-white/5 border border-white/10 text-white py-3 rounded-2xl hover:bg-blue-600 hover:border-transparent transition-all text-xs font-bold uppercase tracking-widest">Access Record</button>
+                </div>
+            `).join('');
+        }
+
+        function viewPatient(id) {
+            const p = patients.find(patient => patient.id === id);
+            const modal = document.getElementById('modal');
+            const body = document.getElementById('modal-body');
+            document.getElementById('modal-title').innerText = p.name;
+            document.getElementById('modal-subtitle').innerText = `DIAGNOSIS: ${p.diagnosis.toUpperCase()} // ${p.status}`;
+            body.innerHTML = `
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-3">Pharmacology Order</h4>
+                        <div class="bg-slate-950 p-4 rounded-2xl border border-white/5">
+                            <ul class="space-y-2 text-slate-300 text-sm font-mono">${p.drugs.map(d => `<li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-blue-500"></span> ${d}</li>`).join('')}</ul>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-950 p-4 rounded-2xl border border-white/5">
+                            <h4 class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2">Equipment</h4>
+                            <p class="text-sm text-slate-300 font-mono">${p.equip.join(', ')}</p>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded-2xl border border-white/5">
+                            <h4 class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2">Clinical</h4>
+                            <div class="flex flex-wrap gap-1.5">${p.labs.map(l => `<span class="bg-blue-500/10 text-blue-400 px-2 py-1 rounded text-[10px] font-bold font-mono">${l}</span>`).join('')}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+        window.onload = renderPatients;
+    </script>
+</body>
+</html>
